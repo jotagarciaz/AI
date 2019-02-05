@@ -1,10 +1,8 @@
 import time
 start = time.time()
 from queue import Queue
-from copy import copy,deepcopy
+from copy import copy
 
-
-NODE_NUMBER = 0
 
 class Node:
     object_id = 0
@@ -23,7 +21,6 @@ def read_file(file):
     f = open(file, "r")
     f.seek(0)
     queue=Queue(maxsize=0)  
-    explored = []
     list_elements=[]
     nodes=[]
     for line in f:
@@ -36,14 +33,12 @@ def read_file(file):
     list_elements.append(0)
 
     queue.put(list_elements)
-    res=go_explore(queue,explored,nodes) 
+    res=go_explore(queue,nodes) 
     for i in range(0,len(res)-2):
         if(res[i]==1):
             node=nodes[i]
             res[i]={"id":node.object_id,"weight":node.weight,"value":node.value}
-    for i in range(0,len(res)-2):
-        if(res[i]==0):
-            res.pop(i)
+    res=list(filter(lambda x: x != 0, res))
     
     value=len(res)-1
     weight=len(res)-2
@@ -53,7 +48,7 @@ def read_file(file):
 
 
 
-def go_explore(queue,explored,nodes):
+def go_explore(queue,nodes):
     best_value = 0
     res=[]
     while not queue.empty():
