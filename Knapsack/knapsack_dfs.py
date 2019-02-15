@@ -1,9 +1,11 @@
 import time
+import os
+import psutil
 start = time.time()
-from queue import Queue
 from copy import copy
 
 
+process = psutil.Process(os.getpid())
 class Node:
     object_id = 0
     weight = 0
@@ -20,7 +22,7 @@ class Node:
 def read_file(file):
     f = open(file, "r")
     f.seek(0)
-    queue=Queue(maxsize=0)  
+    stack=[]
     list_elements=[]
     nodes=[]
     for line in f:
@@ -32,12 +34,13 @@ def read_file(file):
     list_elements.append(0)
     list_elements.append(0)
 
-    queue.put(list_elements)
-    res=go_explore(queue,nodes) 
+    stack.append(list_elements)
+    res=go_explore(stack,nodes) 
     for i in range(0,len(res)-2):
         if(res[i]==1):
             node=nodes[i]
             res[i]={"id":node.object_id,"weight":node.weight,"value":node.value}
+    
     res=list(filter(lambda x: x != 0, res))
     
     value=len(res)-1
@@ -48,40 +51,43 @@ def read_file(file):
 
 
 
-def go_explore(queue,nodes):
+def go_explore(stack,nodes):
     best_value = 0
     res=[]
-    while not queue.empty():
-        q=copy(queue.get())
-        for i in range(len(q)):
-            if q[i] is -1:
-                weight = q[len(q)-2]
-                value = q[len(q)-1]
+    while not len(stack)==0:
+        s=copy(stack.pop())
+        for i in range(len(s)):
+            if s[i] is -1:
+                weight = s[len(s)-2]
+                value = s[len(s)-1]
                 if weight<=420:
                     if value > best_value:
-                        res = q
+                        res = s
                         best_value=value
-                    q[i]=0
-                    queue.put(q)
-                    q_positive= copy(q)
-                    q_positive[len(q_positive)-1]=q_positive[len(q_positive)-1]+nodes[i].value
-                    q_positive[len(q_positive)-2]=q_positive[len(q_positive)-2]+nodes[i].weight
-                    q_positive[i]=1
-                    queue.put(q_positive)
+                    s[i]=0
+                    stack.append(s)
+                    s_positive= copy(s)
+                    s_positive[len(s_positive)-1]=s_positive[len(s_positive)-1]+nodes[i].value
+                    s_positive[len(s_positive)-2]=s_positive[len(s_positive)-2]+nodes[i].weight
+                    s_positive[i]=1
+                    stack.append(s_positive)
                 break
-            elif i == len(q)-1:
-                weight = q[len(q)-2]
-                value = q[len(q)-1]
+            elif i == len(s)-1:
+                weight = s[len(s)-2]
+                value = s[len(s)-1]
                 if weight<=420:
                     if value > best_value:
-                        res = q
+                        res = s
                         best_value=value
     return res            
 
 
     
-solution=read_file('data_knapsack')
+solution=read_file('Knapsack/data_knapsack')
+
+
 for data in solution:
     print(data)
 end = time.time()
 print(end - start)
+print(process.memory_info().rss)
