@@ -2,10 +2,7 @@ import time
 start = time.time()
 from copy import deepcopy
 
-"""
-No comprobar al principio, en el DFS vamos buscando 0 y por cada 0 buscamos las posibles combinaciones, las metemos en el stack
-sino hay posibles combinaciones la solución se anula, si no hay 0 entonces hemos encontrado solución.
-"""
+
 """ First we need to extract values from the file"""
 def read_file(file):
     f = open(file, "r")
@@ -13,27 +10,51 @@ def read_file(file):
     stack=[]
     sudokus = []
     matrix = []
+    res = []
     i=0
     for line in f:
-        if(line.find("SUDOKU")!=-1 or line=="\n"):
-            i=0
-            continue
-        else:
+        if not (line.find("SUDOKU")!=-1 or line=="\n"):
+
             line = line[0:9]
             aux=list(map(lambda x: int(x), line))
             matrix.append(aux)
-            if(i==8):
+            i+=1
+            if(i==9):
                 sudokus.append(matrix)
                 matrix=[]
-            i+=1
-    
-    for sudoku in sudokus:
-        res=resolve_sudoku(sudoku)
-        print(res)
-        print("\n\n")
-        
-    
+                i=0
+            
+            
+    for sudoku in sudokus:  
+        aux = deepcopy(sudoku)
+        for row in aux:
+            for i in range(9):
+                if row[i]==0:
+                    row[i] = posible_combinations(aux,aux.index(row),row,i)
+                    
+        beginby=[1,2,3,4,5,6,7,8,9]
+        rowbegin=0
+        columnbegin=0
+        for row in aux:
+            for element in row:
+                if isinstance(element,list):
+                    if len(element)==1:  
+                        element = element.pop()
+                        
+                    elif len(element) < len(beginby):
+                        beginby=element
+                        rowbegin=aux.index(row)
+                        columnbegin = row.index(element)
+        for b in beginby:
+            sudoku[rowbegin][columnbegin] = b
+            stack.append(deepcopy(sudoku))
+       
+        res.append(go_explore(stack))
 
+    for r in res:    
+        print(r,"\n\n")
+        
+        
 def posible_combinations(sudoku,row_index,row,column_index):
     first_row = int(row_index/3)
     first_column= int(column_index/3)
@@ -76,11 +97,7 @@ def go_explore(stack):
             return res
     return res       
 
-def resolve_sudoku(sudoku):
-    stack = []
-    stack.append(sudoku)
-    res = go_explore(stack)
-    return res
+
 
 read_file("Sudoku/sudoku")
 end = time.time()
