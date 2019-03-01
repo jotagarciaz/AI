@@ -32,29 +32,35 @@ def read_file(file):
                 if row[i]==0:
                     row[i] = posible_combinations(aux,aux.index(row),row,i)
                     
-        beginby=[1,2,3,4,5,6,7,8,9]
-        rowbegin=0
-        columnbegin=0
-        for row in aux:
-            for element in row:
-                if isinstance(element,list):
-                    if len(element)==1:  
-                        element = element.pop()
-                        
-                    elif len(element) < len(beginby):
-                        beginby=element
-                        rowbegin=aux.index(row)
-                        columnbegin = row.index(element)
-        for b in beginby:
-            sudoku[rowbegin][columnbegin] = b
-            stack.append(deepcopy(sudoku))
-       
-        res.append(go_explore(stack))
+        sudoku,aux,stack=next_step(sudoku,aux,stack)
+        res.append(go_explore(stack,aux))
 
     for r in res:    
         print(r,"\n\n")
         
-        
+def next_step(sudoku,aux,stack):
+    beginby=[1,2,3,4,5,6,7,8,9]
+    rowbegin=0
+    columnbegin=0
+    for row in aux:
+        for element in row:
+            if isinstance(element,list):
+                if len(element)==1:  
+                    sudoku[aux.index(row)][row.index(element)]=element[0]
+                    element=element.pop()
+                elif len(element) < len(beginby):
+                    beginby=element
+                    rowbegin=aux.index(row)
+                    columnbegin = row.index(element)
+    if len(beginby)<9:
+        element=posible_combinations(aux,rowbegin,aux[rowbegin],columnbegin)
+        for b in element:
+            sudoku[rowbegin][columnbegin] = b
+            stack.append(deepcopy(sudoku))
+
+    return sudoku,aux,stack 
+
+
 def posible_combinations(sudoku,row_index,row,column_index):
     first_row = int(row_index/3)
     first_column= int(column_index/3)
@@ -73,28 +79,13 @@ def posible_combinations(sudoku,row_index,row,column_index):
             res.append(i)
     return res
             
-def go_explore(stack):
+def go_explore(stack,aux):
 
     while not len(stack)==0:
         s=stack.pop()
-        complete = True
-        for row in s:
-            if not complete:
-                break
-            for i in range(0,9):
-                if row[i]==0:
-                    complete= False
-                    aux = posible_combinations(s,s.index(row),row,i)
-                    if len(aux)>0:
-                        for a in aux:
-                            row[i] = a
-                            saux=deepcopy(s)
-                            stack.append(saux)
-                    break
-
-        if complete:        
+        s,aux,stack=next_step(s,aux,stack)
+        if(len(stack)==0):
             res=s
-            return res
     return res       
 
 
