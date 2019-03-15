@@ -1,4 +1,9 @@
+import time
+start = time.time()
 from copy import deepcopy 
+import os
+import psutil
+proccess = psutil.Process(os.getpid())
 
 """ First we need to extract values from the file"""
 def read_files(file1,file2):
@@ -38,18 +43,28 @@ def read_files(file1,file2):
         nodes[k]=n
     
     nodes=aStar(nodes,real)
-    return nodes
+
+    return nodes,nodes[1][-1]
 
 def aStar(nodes,real):
     path=[["Malaga"],[]]
     last_visited=path[0][-1]
+    total=0
     while last_visited != 'Valladolid':
+        map(lambda x:x[1]+total,nodes[last_visited])
+        nodes[last_visited]=sorted(nodes[last_visited], key=lambda x:x[1])
         for city,distance in nodes[last_visited]:
             if city not in path[0]:
+                total=total+real[last_visited][city]
                 path[0].append(city)
-                path[1].append(real[last_visited][city])
+                path[1].append(total)
                 break
         last_visited=path[0][-1]
     return path 
-        
-print(read_files("city_roads","straight_city"))
+
+result1, result2=read_files("city_roads","straight_city")        
+print(result1[0],result2)
+end = time.time()
+print(end - start)
+
+print(proccess.memory_info().rss)

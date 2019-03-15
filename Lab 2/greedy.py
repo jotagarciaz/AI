@@ -1,3 +1,9 @@
+import time
+start = time.time()
+from copy import deepcopy 
+import os
+import psutil
+proccess = psutil.Process(os.getpid())
 
 """ First we need to extract values from the file"""
 def read_files(file1,file2):
@@ -29,6 +35,7 @@ def read_files(file1,file2):
         distance=int(line_split[1])
         straight.update({city:distance})
     
+    real_distances=deepcopy(nodes)
     for k,n in nodes.items():
         for destiny in n:
             n[destiny]=straight[destiny]
@@ -36,7 +43,10 @@ def read_files(file1,file2):
         nodes[k]=n
     
     nodes=bfs(nodes)
-    return nodes
+    sum=0
+    for n in range(1,len(nodes[0])):
+        sum=sum+real_distances[nodes[0][n-1]][nodes[0][n]]
+    return nodes,sum
 
 def bfs(nodes):
     path=[["Malaga"],[]]
@@ -50,4 +60,9 @@ def bfs(nodes):
         last_visited=path[0][-1]
     return path 
         
-print(read_files("city_roads","straight_city"))
+result1, result2=read_files("city_roads","straight_city")        
+print(result1[0],result2)
+end = time.time()
+print(end - start)
+
+print(proccess.memory_info().rss)
