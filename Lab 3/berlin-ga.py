@@ -7,10 +7,10 @@ import psutil
 proccess = psutil.Process(os.getpid())
 import random
 
-N_MUTANTS=5
+N_MUTANTS=10
 mutants=[]
 MAXIMUN_DISTANCE_ALLOWED=9000
-visited=[]
+
 class Point:
     id=0
     x=0
@@ -42,7 +42,7 @@ def read_file(file):
 
 def generate_mutants(list_points):
     variations=list_points[1:len(list_points)]
-    
+    global mutants
     for i in range(0,N_MUTANTS):
         aux=[]
         aux.append(list_points[0])
@@ -63,6 +63,7 @@ def calculate_distance_between_points(point1,point2):
 
 def order_paths():
     order=[]
+    global mutants
     for m in mutants:
         result_path=calculate_distance_path(m)
         order.append((result_path,m))
@@ -93,6 +94,7 @@ def crossover(parent1,parent2):
     return crossover
 
 def mutate(crossover):
+    global mutants
     for i in range(1,N_MUTANTS):
         mutants[i]=crossover
         random_index1 = random.randrange(1,len(mutants[i])-1)
