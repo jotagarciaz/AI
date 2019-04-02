@@ -7,9 +7,11 @@ import psutil
 proccess = psutil.Process(os.getpid())
 import random
 
-N_MUTANTS=10
+N_MUTANTS=200
 mutants=[]
 MAXIMUN_DISTANCE_ALLOWED=9000
+MAXIMUN_GENERATIONS_EXTRA=200
+visited=[]
 
 class Point:
     id=0
@@ -83,41 +85,60 @@ def crossover(parent1,parent2):
         aux.append(parent1[i])
     
     
-    first_time=True
-    for e in parent1:
+    for e in parent2:
         if e not in aux:
             crossover.append(e)
-        elif first_time:
-            first_time=False
-            for a in aux:
-                crossover.append(a)
+
+    for i in range(start_index,finish_index):
+        crossover.insert(i,aux.pop(0))
+            
     return crossover
 
-def mutate(crossover):
+def mutate():
     global mutants
     for i in range(1,N_MUTANTS):
-        mutants[i]=crossover
-        random_index1 = random.randrange(1,len(mutants[i])-1)
-        random_index2 = random.randrange(1,len(mutants[i])-1)
-        aux=mutants[i][random_index1]
-        mutants[i][random_index1]=mutants[i][random_index2]
-        mutants[i][random_index2]=aux
+        while mutants[i] in visited:
+            random_index1 = random.randrange(1,len(mutants[i])-1)
+            random_index2 = random.randrange(1,len(mutants[i])-1)
+            aux=mutants[i][random_index1]
+            mutants[i][random_index1]=mutants[i][random_index2]
+            mutants[i][random_index2]=aux
+        visited.append(mutants[i])
 
 def main():
-   
+    global mutants
     points=read_file("berlin_coordinates")
     generate_mutants(points)
     result_distance=MAXIMUN_DISTANCE_ALLOWED*100
     while result_distance>9000:
         order_paths()
         distance=calculate_distance_path(mutants[0])
-        cross=crossover(mutants[0],mutants[1])
+
+        for i in range(1,N_MUTANTS):
+            cross=crossover(mutants[0],mutants[i])
+            mutants[i]=cross
         
         if(distance<result_distance):
             result_distance=distance
             print("best distance until now: ",result_distance)
             result_path=mutants[0]
-        mutate(cross)
+        mutate()
+
+    
+    for generations in range(0,MAXIMUN_GENERATIONS_EXTRA):
+        order_paths()
+        distance=calculate_distance_path(mutants[0])
+
+        for i in range(1,N_MUTANTS):
+            cross=crossover(mutants[0],mutants[i])
+            mutants[i]=cross
+        
+        if(distance<result_distance):
+            result_distance=distance
+            print("best distance until now: ",result_distance)
+            result_path=mutants[0]
+        mutate()
+
 
     print("Best result distance: ",result_distance," Best result path: ",result_path)
     
