@@ -7,14 +7,15 @@ import psutil
 proccess = psutil.Process(os.getpid())
 import random
 from functools import reduce
+import matplotlib.pyplot as plt
 
 N_MUTdistances=52
-ANTS_NUMBER=100
+ANTS_NUMBER=150
 PHEROMONE_INIT_VALUE=10
 MAXIMUN_DISTANCE_ALLOWED=9000
-alpha= 0.9
-beta=1.2
-PROBABILITY = 0.95
+alpha= 1
+beta=2
+PROBABILITY = 0.995
 
 list_points=[] #list of points received from the file
 pheromone=[[(PHEROMONE_INIT_VALUE if i is not j else 0) for i in range(N_MUTdistances)] for j in range(N_MUTdistances)]
@@ -61,7 +62,7 @@ def calculate_distance_between_points(point1,point2):
 def calculate_distances():
     global distances
     for i in list_points:
-        aux=[] #type: list
+        aux=[] 
         for j in list_points:
             if i == j:
                 aux.append(math.inf)
@@ -92,10 +93,7 @@ def transition_rule(path):
     for i in not_visited:
         calculate_probabilistic_s.append(((pheromone[index_r][list_points.index(i)]**alpha)*(heuristic[index_r][list_points.index(i)]**beta))/sum)
     
-    """
-    max_prob=max(calculate_probabilistic_s)
-    return not_visited[calculate_probabilistic_s.index(max_prob)]
-    """
+    
     sum_fit=reduce((lambda x,y: x+y),calculate_probabilistic_s)
     calculate_probabilistic_s= list(map(lambda x: x/sum_fit, calculate_probabilistic_s))
 
@@ -108,11 +106,7 @@ def transition_rule(path):
 
     return not_visited[counter-1]
     
-    """
-    index = random.randrange(0,len(not_visited))
 
-    return not_visited[index]
-    """
 
 def calculate_distance_path(l):
     total=0
@@ -162,12 +156,16 @@ def main():
     read_file("berlin_coordinates")
     calculate_distances()
     calculate_heuristic()
- 
+    graph_distances=[]
+    graph_counter=[]
+
+    generation=0
+    cost=[]
     while best_distance > MAXIMUN_DISTANCE_ALLOWED:
-        L=[]
+        L.clear()
         for k in range(ANTS_NUMBER):
             L.append([list_points[0],list_points[0]])
-        cost = []
+        cost.clear()
         best_actual_distance = best_distance
         
         for j in range(N_MUTdistances-1):
@@ -187,8 +185,15 @@ def main():
         if best_actual_distance<best_distance: 
             best_distance = best_actual_distance
             best_path = best_actual_path
-            print(best_distance)
+            print("Actual best distance: ",best_distance," generation: ",generation)
             pheromone_update_global(best_path)
+            graph_distances.append(best_actual_distance)
+            graph_counter.append(generation)
+        generation +=1
 
     print("best distance: ",best_distance," best path: ",best_path)
+    plt.plot(graph_counter,graph_distances)
+    plt.ylabel('Distance')
+    plt.xlabel('Generation')
+    plt.show()
 main()
