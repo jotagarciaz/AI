@@ -6,11 +6,13 @@ import os
 import psutil
 proccess = psutil.Process(os.getpid())
 import random
+import matplotlib.pyplot as plt
+
 
 N_MUTANTS=50
 mutants=[]
 MAXIMUN_DISTANCE_ALLOWED=9000
-MAXIMUN_GENERATIONS_EXTRA=5000
+MAXIMUN_GENERATIONS_EXTRA=0
 
 
 class Point:
@@ -105,15 +107,20 @@ def mutate():
     mutants[i][random_index2]=aux
 
 
+
 def main():
+
     global mutants
     points=read_file("berlin_coordinates")
     generate_mutants(points)
     result_distance=MAXIMUN_DISTANCE_ALLOWED*100
+    graph_distances=[]
+    graph_counter=[]
+    counter=0
     while result_distance>9000:
         order_paths()
         distance=calculate_distance_path(mutants[0])
-
+        
         for i in range(2,N_MUTANTS):
             cross=crossover(mutants[0],mutants[i])
             mutants[i]=cross
@@ -122,9 +129,17 @@ def main():
             result_distance=distance
             print("best distance until now: ",result_distance)
             result_path=mutants[0]
+            graph_counter.append(counter)
+            graph_distances.append(result_distance)
         mutate()
-
+        counter+=1
     
+    plt.plot(graph_counter,graph_distances)
+    plt.ylabel('Distance')
+    plt.xlabel('Generation')
+    plt.show()
+
+
     for generations in range(0,MAXIMUN_GENERATIONS_EXTRA):
         order_paths()
         distance=calculate_distance_path(mutants[0])

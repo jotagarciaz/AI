@@ -7,11 +7,20 @@ import psutil
 proccess = psutil.Process(os.getpid())
 import random
 
-N_MUTANTS=50
-mutants=[]
+N_MUTdistances=53
+PHEROMONE_INIT_VALUE=10
+
+distances=[ [0 for i in range(N_MUTdistances)] for j in range(N_MUTdistances)]
+heuristic=[]
+pheromone=[[(PHEROMONE_INIT_VALUE if i is not j else 0) for i in range(N_MUTdistances)] for j in range(N_MUTdistances)]
+cost=[]
+list_points=[]
+actual_best_distance=[]
+
 MAXIMUN_DISTANCE_ALLOWED=9000
 MAXIMUN_GENERATIONS_EXTRA=5000
-
+alpha =0.5
+beta= 1-alpha
 
 class Point:
     id=0
@@ -42,18 +51,6 @@ def read_file(file):
     
     return list_points
 
-def generate_mutants(list_points):
-    variations=list_points[1:len(list_points)]
-    global mutants
-    for i in range(0,N_MUTANTS):
-        aux=[]
-        aux.append(list_points[0])
-        random.shuffle(variations)
-        for v in variations:
-            aux.append(v)
-        aux.append(list_points[0])
-        mutants.append(aux)
-
 def calculate_distance_path(mutant):
     total=0
     for p in range(1,len(mutant)):
@@ -63,85 +60,103 @@ def calculate_distance_path(mutant):
 def calculate_distance_between_points(point1,point2):
     return math.sqrt((point2.x-point1.x)**2+(point2.y-point1.y)**2)
 
-def order_paths():
-    order=[]
-    global mutants
-    for m in mutants:
-        result_path=calculate_distance_path(m)
-        order.append((result_path,m))
-    order=sorted(order)
-    
-    for o in range(0,len(order)):
-        mutants[o]=order[o][1]
-
-
-def crossover(parent1,parent2):
-    best_distance=MAXIMUN_DISTANCE_ALLOWED
-    start_index=random.randrange(0,len(parent1)-2)
-    finish_index=random.randrange(start_index,len(parent1)-1)
-    crossover=[]
+def calculate_distances(list_points):
+    global distances
     aux=[]
-    for i in range(start_index,finish_index):
-        aux.append(parent1[i])
-    
-    
-    for e in parent2:
-        if e not in aux:
-            crossover.append(e)
+    for i in list_points:
+        for j in list_points:
+            aux.append(calculate_distance_between_points(i,j))
+        distances.append(aux)
 
-    for i in range(start_index,finish_index):
-        crossover.insert(i,aux.pop(0))
-            
-    return crossover
+def not_zero_division_heuristic(x):
+   return  1/x if int(x) is not 0 else 0
 
-def mutate():
-    global mutants
-    i=random.randrange(1, len(mutants))
-    #for i in range(1,N_MUTANTS):
-    random_index1 = random.randrange(1,len(mutants[i])-1)
-    random_index2 = random.randrange(1,len(mutants[i])-1)
-    aux=mutants[i][random_index1]
-    mutants[i][random_index1]=mutants[i][random_index2]
-    mutants[i][random_index2]=aux
+def calculate_heuristic():
+    global heuristic
+    for l in distances:
+        heuristic.append(list(map(lambda x: not_zero_division_heuristic(x), l)))
+
+
+#¿t? recieves  destination city s p no es un aleatorio
+def pheromone_update(s,iteration,distances,cost):
+    global pheromone
+    global list_points
+    result=0
+    for i in range(len(list_points)):
+        result+=1/cost[i][s]
+    
+    for i in range(len(list_points)):
+        p=random.random()
+        pheromone[i][s]=(1-p)*pheromone[i][s]*(iteration-1)+result
+
+def transition_rule(r,p,h):
+    sum=0
+    calculate_probabilistic_s=[]
+    for i in list_points:
+        if i not in r:
+            sum+= p[i]**alpha+h[i]**beta
+    for i in list_points:
+        if i not in r:
+            calculate_probabilistic_s.append((p[i]**alpha+h[i]**beta)/sum)
+    
+    index=random.random()
+    sum = 0
+    counter=0
+    while index>sum:
+        sum = sum + calculate_probabilistic_s[counter]
+        counter+=1
+
+    return counter-1
+
 
 
 def main():
-    global mutants
+    global list_points
     points=read_file("berlin_coordinates")
-    generate_mutants(points)
+    calculate_distances(points)
+    
+    
+    #initialize distances
+
+    for i in range(0,len(points)):
+        distances[i] = points[0]
+        
+    calculate_heuristic()
+
     result_distance=MAXIMUN_DISTANCE_ALLOWED*100
-    while result_distance>9000:
-        order_paths()
-        distance=calculate_distance_path(mutants[0])
+    iteration=0
 
-        for i in range(2,N_MUTANTS):
-            cross=crossover(mutants[0],mutants[i])
-            mutants[i]=cross
+    while(result_distance>9000):
         
-        if(distance<result_distance):
-            result_distance=distance
-            print("best distance until now: ",result_distance)
-            result_path=mutants[0]
-        mutate()
 
-    
-    for generations in range(0,MAXIMUN_GENERATIONS_EXTRA):
-        order_paths()
-        distance=calculate_distance_path(mutants[0])
+        #build the solutions
+        for i in range(1,len(points)):
+            for k in range(len(distances)):
+                distances[k][i]=transition_rule(distances[k],pheromone[k],heuristic[k])
 
-        for i in range(2,N_MUTANTS):
-            cross=crossover(mutants[0],mutants[1])
-            mutants[i]=cross
+
         
-        if(distance<result_distance):
-            result_distance=distance
-            print("best distance until now: ",result_distance)
-            result_path=mutants[0]
-        mutate()
+        mejor_coste=MAXIMUN_DISTANCE_ALLOWED*100
+        #calculate the total cost of the distances and the best ant
+        for i in range(len(distances)):
+            coste = calculate_distance_path(distances[i])
+            cost.append(coste)
+            if coste < mejor_coste:
+                actual_best_distance = distances[i]
+                mejor_coste=coste
 
+        for i in range(0, len(distances)):
+            for j in range(0, len(distances)):
+                pheromone_update(distances[k][-1],iteration,distances,cost)
 
-    print("Best result distance: ",result_distance," Best result path: ",result_path)
-    
+        if mejor_coste < result_distance :
+            result_distance=mejor_coste
+            result_path=actual_best_distance
+
+        print("Best result distance: ",result_distance," Best result path: ",result_path)
+
+        iteration+=1
+    print("Distance: ",result_distance," Path: ",result_path)
     end = time.time()
     print(end - start)
     print(proccess.memory_info().rss)
