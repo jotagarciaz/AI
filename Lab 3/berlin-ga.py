@@ -78,7 +78,6 @@ def order_paths():
 
 
 def crossover(parent1,parent2):
-    best_distance=MAXIMUN_DISTANCE_ALLOWED
     start_index=random.randrange(0,len(parent1)-2)
     finish_index=random.randrange(start_index,len(parent1)-1)
     crossover=[]

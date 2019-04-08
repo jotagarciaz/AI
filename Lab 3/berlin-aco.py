@@ -192,8 +192,12 @@ def main():
         generation +=1
 
     print("best distance: ",best_distance," best path: ",best_path)
-    plt.plot(graph_counter,graph_distances)
+    """plt.plot(graph_counter,graph_distances)
     plt.ylabel('Distance')
     plt.xlabel('Generation')
-    plt.show()
+    plt.show()"""
+
+    end = time.time()
+    print(end - start)
+    print(proccess.memory_info().rss)
 main()
