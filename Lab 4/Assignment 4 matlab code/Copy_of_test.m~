@@ -1,15 +1,16 @@
  path = '/Users/jgarcia/Documents/Artificial Intelligence/Lab 4';
  addpath(genpath(path))
 
- %
- functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
- %example: functions = 2;
+ %functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
+ %example: 
+ functions = 10;
  %example: functions = [2 4 9];
+ %functions=[3 5 10];
  numF = size(functions,2);
  nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
- populationSize = 40; % Adjust this to your algorithm
-
+ populationSize = 2500; % Adjust this to your algorithm
+ pr=0.6; % probability of recombination
  for i = 1:numF
 
     fitfun = functions(i); %fitfun is the function that we are solving
@@ -41,48 +42,47 @@
 
          while(objetiveValue < bestSolutionFitness && currentEval < maxEval)
 
+              
               % Your algorithm goes here
-
-              selectOneForBest = find(populationFitness==bestSolutionFitness);
-              bestParentIndex = selectOneForBest(1);
-              [out,idx]=sort(populationFitness);
-              val=out(2);
-              selectOneForSecondBest=idx(2);
-              secondBestParentIndex=selectOneForSecondBest(1);
-               
               
-              % Crossover 
-              for z=1:populationSize
-                  if (z ~= bestParentIndex) && (z~=secondBestParentIndex)
-                    startIndex =int8( 1 + (dimension-2).*rand); 
-                    finishIndex =int8( startIndex + (dimension-startIndex).*rand);
-                    aux = population(bestParentIndex,startIndex:finishIndex);
-                    crossover = population(secondBestParentIndex,:);
-                    counter=1;
-                    for s=startIndex:finishIndex
-                        crossover(s)=aux(counter);
-                        counter=counter+1;
-                    end
-                    population(z,:) = crossover;
-                  end
-              end
-              
+              mutants=population;
+              offspring=population;
               %mutation
-              
-              indexElementToMutate=int8(bestParentIndex); 
-              while(indexElementToMutate == bestParentIndex || indexElementToMutate==secondBestParentIndex)
-                  indexElementToMutate=int8(1 + (populationSize-1) .* rand);
+              for indexElementToMutate=1:populationSize
+                  random_index1 = int8( 1 + (dimension-2).* rand);
+                  random_index2 = int8(random_index1 + (dimension-1).* rand);
+                  for z=random_index1:random_index2
+                      aux=mutants(indexElementToMutate,random_index2);
+                      mutants(indexElementToMutate,random_index2)=mutants(indexElementToMutate,random_index1);
+                      mutants(indexElementToMutate,random_index1)=aux;
+                      random_index2=random_inde              
+                  end
+                  aux=mutants(indexElementToMutate,random_index2);
+                  mutants(indexElementToMutate,random_index2)=mutants(indexElementToMutate,random_index1);
+                  mutants(indexElementToMutate,random_index1)=aux;
               end
-              random_index1 = int8( 1 + (dimension-1) .* rand);
-              random_index2 = int8(1 + (dimension-1) .* rand);
-              aux=population(indexElementToMutate,random_index2);
-              population(indexElementToMutate,random_index2)=population(indexElementToMutate,random_index1);
-              population(indexElementToMutate,random_index1)=aux;
-             
+              
+              % recombination
+               for z=1:populationSize
+                    randomValue=rand;
+                    if(randomValue<pr)
+                        offspring(z)=mutants(z);
+                    end
+               end
+              
+               offspringFitness = calculateFitnessPopulation_2005(fitfun, offspring, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
+              
+              % selection
+              for z=1:populationSize
+                    if offspringFitness(z)<populationFitness(z)
+                        population(z)=offspring(z);
+                    end
+               end
               
               % recalculate
               
               populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
+            
               bestSolutionFitness = min(populationFitness);
               currentEval = currentEval + populationSize;
               % Your algorithm goes here
