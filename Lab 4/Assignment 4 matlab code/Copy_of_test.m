@@ -10,8 +10,8 @@
  nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
  populationSize = 700; % Adjust this to your algorithm
- pr=0.25; % probability of recombination
- F=0.5;
+ pr=0.8; % probability of recombination
+ F=1.25;
  
  for i = 1:numF
 
@@ -51,19 +51,19 @@
               offspring=population;
               %mutation
               for indexElementToMutate=1:populationSize
-                  random_index1 = int8( 1 + (dimension-2).* rand);
-                  random_index2 = int8(random_index1 + (dimension-random_index1).* rand);
+                  individual1 = int8( 1 + (populationSize-1).* rand);
+                  individual2=int8(1+(populationSize-1).*rand);
+                  individual3=int8(1+(populationSize-1).*rand);
                   
-                  while random_index1<random_index2
-                      aux=mutants(indexElementToMutate,random_index2);
-                      mutants(indexElementToMutate,random_index2)=mutants(indexElementToMutate,random_index1);
-                      mutants(indexElementToMutate,random_index1)=aux;
-                      random_index2=random_index2-1;   
-                      random_index1=random_index1+1;
+                  while (individual1 == individual2 || individual1 == individual3 || individual2==individual3)
+                    individual1 = int8( 1 + (populationSize-1).* rand);
+                    individual2=int8(1+(populationSize-1).*rand);
+                    individual3=int8(1+(populationSize-1).*rand);
                   end
-                  aux=mutants(indexElementToMutate,random_index2);
-                  mutants(indexElementToMutate,random_index2)=mutants(indexElementToMutate,random_index1);
-                  mutants(indexElementToMutate,random_index1)=aux;
+                  
+                  
+                  aux=population(individual1)+F*(population(individual2)-population(individual3));
+                  mutants(indexElementToMutate)=aux;
               end
               
               % recombination
