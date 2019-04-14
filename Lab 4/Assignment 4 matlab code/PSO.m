@@ -1,5 +1,5 @@
- %path = 'C:\Users\mlz02\Documents\MATLAB\DE LIBRARY';
- %addpath(genpath(path))
+ path = '/Users/jgarcia/Documents/Artificial Intelligence/Lab 4';
+ addpath(genpath(path))
 
  functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
  %example: functions = 1;
@@ -39,7 +39,7 @@
          populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
          bestSolutionFitness = min(populationFitness);
          currentEval = currentEval + populationSize;
-
+ 
          % Algorithm loop
          g=1;
          globalFitness=bestSolutionFitness;
@@ -52,7 +52,7 @@
               for z=1:populationSize
                 index=randi([1,populationSize]);
                 VX(z) = population(index);
-                V=gradient(VX,randi([-Vmax, Vmax]));
+                V=randi([-Vmax, Vmax],1,20);
                 pBest(z)=populationFitness(index);
               end
          while(objetiveValue < bestSolutionFitness && currentEval < maxEval)
@@ -71,12 +71,15 @@
               pBest = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b);
               [pBestFitness,gid] = min(populationFitness);
               
-              %Adjust Velocity
-              V= V + cognitive*rand().*(pBest-VX) +social*rand().*(gid-VX);
+               for z=1:populationSize
+                 %Adjust Velocity
+              V(z) = V(z) + cognitive*rand().*(pBest(z)-VX(z)) +social*rand().*(gid-VX(z));
               
               %Position adjustment
-              VX=VX+V;
+              VX(z)=VX(z)+V(z);
               
+              end
+             
               pBest = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
               populationFitness=pBest;
               bestSolutionFitness = min(populationFitness);

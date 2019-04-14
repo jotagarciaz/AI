@@ -4,13 +4,14 @@
  %functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
  %example: functions = 1;
  %example: 
- functions = [8 9 10];
+ functions = [4 5 6 7 8 9 10];
  numF = size(functions,2);
  nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
- populationSize = 100; % Adjust this to your algorithm
- delta = 2;
- alphaVariable=0.5; %0.1;
+ populationSize = 20; % Adjust this to your algorithm
+ delta = 0.15;
+ pM = 0.1;
+ alphaVariable = 0.25; %0.1;
 
  %el fitness no sirve para la selección
  for i = 1:numF
@@ -50,7 +51,7 @@
                selectOneForBest = find(populationFitness==bestSolutionFitness);
                bestParentIndex = selectOneForBest(1);
                [~,idx]=sort(populationFitness);
-               keepIndividuals=int8(populationSize/10);
+               keepIndividuals=int8(populationSize/4);
                selectOneForSecondBest=idx(2);
                secondBestParentIndex=selectOneForSecondBest(1);
              
@@ -96,12 +97,15 @@
               end
               
               %mutation
-               for z=keepIndividuals:populationSize
-                   if z ~= bestParentIndex && z ~= secondBestParentIndex
-                  for r=1:dimension
-                      population(idx(z),r) = population(idx(z),r) + sqrt(delta)*randn(1);   
+              for z=keepIndividuals:populationSize
+                  randomP = rand;
+                  if randomP < pM
+                      if z ~= bestParentIndex && z ~= secondBestParentIndex
+                          for r=1:dimension
+                              population(idx(z),r) = population(idx(z),r) + sqrt(delta)*randn(1);
+                          end
+                      end
                   end
-                   end
               end
 %               indexElementToMutate=int8(bestParentIndex); 
 %               while(indexElementToMutate == bestParentIndex ||  indexElementToMutate==secondBestParentIndex)
