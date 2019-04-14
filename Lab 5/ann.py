@@ -5,18 +5,16 @@ import random
 f = open("training", 'r')
 f.seek(0)
 n_lines_to_read = len(f.readlines())
-LINE_LEN=784
+LINE_LEN=785
 PERCENTAGE_TRAINING=0.7
-PERCENTAGE_VALIDATION=0.1
-PERCENTAGE_TEST=0.2
+PERCENTAGE_VALIDATION=0.2
+PERCENTAGE_TEST=0.1
+COLUMN_RESULT = 0
 
-number_neurons = 10
-weights = [] #type: list
-dout = 0 #delta of output neuron
-#delta of neurons from hidden layer
-dhidden = [] #type: list
-l_rate = 0.01
-epoch = 30
+NUMBER_OF_HIDDEN_LAYER:2
+HIDDEN_LAYER_FIRST_LAYER=10
+OUTPUT_LAYER=10
+LEARNING_RATE=0.005
 
 def num(s):
     try:
@@ -24,18 +22,49 @@ def num(s):
     except ValueError:
         return float(s)
 
+class Neuron:
+
+    output=0
+    net=0
+    inputs=[]
+    weights=[]
+    def __init__(self):
+        self.output=0
+        self.net=0
+        self.inputs=[]
+        self.weights=[]
+
+    def clear_variables(self):
+        self.output=0
+        self.net=0
+        self.inputs=[]
+    
+    def set_weights(self,weights):
+        self.weights=weights
+    def add_weights(self,weight):
+        self.weights.append(weight)
+
+    def sum(self,inpt,weight):
+        self.inputs.append(inpt)
+        self.net=self.net+(inpt*weight)
+    def sigmoid(self):
+        self.output= 1/(1+math.exp(self.net))
+    def sign(self):
+        self.output= 1 if self.net>0 else -1
+    def __repr__(self):
+        return "output: %i" % (self.output)    
+    def __str__(self):
+        return "output: %i" % (self.output)   
+
+
 """ First we need to extract values from the file"""
 def read_training_set():
     n_lines_training = int(PERCENTAGE_TRAINING * n_lines_to_read)
     training_set = []  # type: list
     f.seek(0)
-    for i in range(0, n_lines_training):
+    for i in range(0, n_lines_training): #n_lines_training):
         aux = f.readline()
-        training_set.append(aux.split(",", LINE_LEN))
-
-    for i in range(0, len(training_set)):
-        training_set[i] = list(map(lambda x: num(x), training_set[i]))
-
+        training_set.append(list(map(lambda x: num(x), aux.split(",", LINE_LEN))))
     return training_set
 
 def read_validation_set():
@@ -44,10 +73,7 @@ def read_validation_set():
     validation_set = []  # type: list
     for i in range(0, n_lines_validation):
         aux = f.readline()
-        validation_set.append(aux.split(",", LINE_LEN))
-
-    for i in range(0, len(validation_set)):
-        validation_set[i] = list(map(lambda x: num(x), validation_set[i]))
+        validation_set.append(list(map(lambda x: num(x), aux.split(",", LINE_LEN))))
 
     return validation_set
 
@@ -57,112 +83,198 @@ def read_testing_set():
     testing_set = []  # type: list
     for i in range(0, n_lines_testing):
         aux = f.readline()
-        testing_set.append(aux.split(",", LINE_LEN))
-
-    for i in range(0, len(testing_set)):
-        testing_set[i] = list(map(lambda x: num(x), testing_set[i]))
+        testing_set.append(list(map(lambda x: num(x), aux.split(",", LINE_LEN))))
 
     return testing_set
 
-def generate_random_weights(range_given):
-    random_weights = []  # type: list
-    for x in range(range_given):
-        random_weights.append(random.uniform(-1.0,1.0))  
-    return random_weights
+
+def read_all_sets():
+    training_set=read_training_set()
+    validation_set=read_validation_set()
+    testing_set=read_testing_set()
+
+    return training_set, validation_set,testing_set
+
+def calculate_weight():
+    
+    return random.uniform(-1,1)
+
+def initialize_hidden_layer():
+    list_neurons_hidden_layer=[]
+    for i in range (0,HIDDEN_LAYER_FIRST_LAYER):
+        n = Neuron()    
+        weight=calculate_weight() 
+        n.add_weights(weight)
+        n.sum(1,weight) #W0 
+        list_neurons_hidden_layer.append(n)
+    return list_neurons_hidden_layer
 
 
-def calc_output_neuron(input, neuron):
-    global weights
-    sum = weights[(len(input)-1)+neuron][0] #The starter weight for the neuron itself
-    #We calculate net.
-    for i in range(len(input)-1):
-        sum += weights[i][neuron]*input[i]
-    #Next we calculate the sigmoid function.
-    net = -sum
-    output = 1/(1+math.exp(net))
+def initialize_output_layer():
+    list_neurons_output_layer=[]
+    for i in range (0,OUTPUT_LAYER):
+        n = Neuron()            
+        weight = calculate_weight()
+        n.add_weights(weight)
+        n.sum(1,weight) #W0 
+        list_neurons_output_layer.append(n) 
+    return list_neurons_output_layer
+
+def calculate_softmax(list_neurons_output_layer):
+    softmax=[]
+
+    for no in list_neurons_output_layer:
+        no.sigmoid() #¿Es necesario?
+        softmax.append(math.exp(no.output))
+
+    suma=sum(softmax)
+    softmax=list(map(lambda x: x/suma,softmax))
+    output=softmax.index(max(softmax))
     return output
 
-#Input is the array that contains the outputs of the hidden layer.
-def calc_output_neuron_output(input):
-    global weights
-    sum = weights[len(input)-1+number_neurons][0] #The starter weight for the neuron itself
-    #We calculate net.
-    for i in range(number_neurons):
-        sum += weights[i][1]*input[i]
-    #Next we calculate the sigmoid function.
-    net = -sum
-    output = 1/(1+math.exp(net))
-    return output
+def err_output_layer(t,output_neurons):
+    error_at_output_layer=[]
+    total_targets=[[(1 if i is  j else 0) for i in range(OUTPUT_LAYER)] for j in range(OUTPUT_LAYER)]
+    target=total_targets[t[COLUMN_RESULT]]
 
-#Output is the output of the last layer and expected is the target output.
-def error_output_layer(output, expected):
-    return output*(1-output)*(expected - output)
+    for idx,no in enumerate(output_neurons):
+        error_at_output_layer.append((target[idx]-no.output)*no.output*(1-no.output))
 
-def error_hidden_layer(error_output, output_hidden, expected):
-    global weights
-    errors = [] #type: list
-    for k in range(len(output_hidden)):
-        errors.append(output_hidden[k]*(1-output_hidden[k])*weights[19+k][1]*error_output)
-    return errors
+    for idxno,no in enumerate(output_neurons):
+        for idx,x in enumerate(no.inputs):
+            no.weights[idx]=no.weights[idx]+LEARNING_RATE*error_at_output_layer[idxno]*x
+    return output_neurons,error_at_output_layer
 
-def update_weights(deltas, input, outputs):
-    global weights
-    global l_rate
-    for i in range(0, len(input)-1):
-        for neuron in range(0, number_neurons):
-            weights[i][neuron] += l_rate*deltas[neuron]*input[i]
-    for i in range(len(input)-1, number_neurons+len(input)-1):
-        weights[i][0] += l_rate*deltas[i-len(input)-1]
-        weights[i][1] += l_rate*outputs[i-len(input)-1]*outputs[number_neurons]
-    weights[len(weights)-1][0] += l_rate*deltas[number_neurons]
+def err_hidden_layer(t,neurons_hidden,neurons_output,error_at_output_layer):
+    error_at_hidden_layer=[]
+
+    for idx,nh in enumerate(neurons_hidden):
+        suma=0
+        for idxno, no in enumerate(neurons_output):
+            suma+=error_at_output_layer[idxno]*no.weights[idxno]
+        error_at_hidden_layer.append((1-nh.output)*(nh.output)*suma)
+
+    for idxnh,nh in enumerate(neurons_hidden):
+        for idx,x in enumerate(nh.inputs):
+            nh.weights[idx]=nh.weights[idx]+LEARNING_RATE*error_at_hidden_layer[idxnh]*x
+    return neurons_hidden
+
+def clean_layers(list_neurons_hidden_layer,list_neurons_output_layer):
+    list_neurons_hidden_layer=list(map(lambda n: n.clear_variables(),list_neurons_hidden_layer))
+    list_neurons_output_layer=list(map(lambda n: n.clear_variables(),list_neurons_output_layer))
 
 
 def main():
-    for input in training_set:
-        for iteration in range(epoch):
-            outputs = [] #type: list
-            for neuron in range(number_neurons):
-                outputs.append(calc_output_neuron(input, neuron))
-            out = calc_output_neuron_output(outputs)
-            dout = error_output_layer(out, input[-1])
-            dhidden = error_hidden_layer(dout, outputs, input[-1])
-            dhidden.append(dout)
-            outputs.append(out)
-            update_weights(dhidden, input, outputs)
+
+    training_set=read_training_set()
+
+    list_neurons_hidden_layer=initialize_hidden_layer()
+    list_neurons_output_layer=initialize_output_layer()
+
+    for n in list_neurons_hidden_layer :
+            #todos los elementos menos el target
+        weight = [(calculate_weight()) for i in range(LINE_LEN)]
+        n.set_weights(weight)
+    
+    
+    for no in list_neurons_output_layer:
+        weight=[(calculate_weight()) for i in range(len(list_neurons_hidden_layer)+1)]
+        no.set_weights(weight)
+
+    #Iniciamos Aprendizaje
+    
+    ronda=0
+    training_complete=False
+    while(not(training_complete)):
+        hits=0
+        counter=0
+        ronda+=1
+        training_complete=False
+        fail=False
+        print("Training...")
+        for t in training_set:
+            for nh in list_neurons_hidden_layer :
+                for i in range(1,LINE_LEN):
+                    nh.sum(t[i], nh.weights[i])
+                nh.sign() #to do signal function maybe we should change and solve the problems of the sigmoid
+                for no in list_neurons_output_layer:
+                    no.sum(nh.output,calculate_weight())
+            
         
-    for row in validation_set:
-        outputs = [] #type: list
-        for neuron in range(number_neurons):
-            outputs.append(calc_output_neuron(row, neuron))
-        out = calc_output_neuron_output(outputs)
-        print("Expected = %d, Predicted = %d"%(row[-1],round(out)))
+            output=calculate_softmax(list_neurons_output_layer)
+            counter+=1
+            if output == t[COLUMN_RESULT]:
+                hits+=1
+            else:
+                fail=True
+            #print("Expected result",t[COLUMN_RESULT]," Output: ", output," percentage: ",(hits/counter))
+            
 
-    hit = 0
-    for row in testing_set:
-        outputs = [] #type: list
-        for neuron in range(number_neurons):
-            outputs.append(calc_output_neuron(row, neuron))
-        out = calc_output_neuron_output(outputs)
-        if out >= 0.5:
-            out = 1
+            # Error Output Layer
+            list_neurons_output_layer,error_at_output_layer=err_output_layer(t,list_neurons_output_layer)
+            
+            #Error Hidden Layer
+            list_neurons_hidden_layer=err_hidden_layer(t,list_neurons_hidden_layer,list_neurons_output_layer,error_at_output_layer)
+
+            clean_layers(list_neurons_hidden_layer,list_neurons_output_layer)
+
+        if not(fail):
+            training_complete=True
         else:
-            out = 0
-        if row[-1] == out:
-            hit += 1
+            print("Otra ronda, ronda: ",ronda," porcentaje de acierto: ",(hits/counter)*100,"%")
+        
+    print("Validation...")
+    validation_set=read_validation_set()
+    """
+    hits=0
+    counter=0
+    for t in validation_set:
+        for i in range(1,LINE_LEN):
+            for n in list_neurons_hidden_layer :
+                inpt=t[i]
+                n.sum(inpt, n.weights[i])
 
-    print(hit/len(testing_set))
+        for nh in list_neurons_hidden_layer:
+            nh.sign() #to do signal function maybe we should change and solve the problems of the sigmoid
+            for no in list_neurons_output_layer:
+                no.sum(nh.output,calculate_weight())
+        
+        
+        output=calculate_softmax(list_neurons_output_layer)
+        
+        # Backpropagation
+        counter+=1
+        if output == t[COLUMN_RESULT]:
+            hits+=1
+        print("Expected result",t[COLUMN_RESULT]," Output: ", output," percentage: ",(hits/counter))
 
-# Main.
+        clean_layers(list_neurons_hidden_layer,list_neurons_output_layer)
+    """
 
-# First we get the data from the data.txt file.
-training_set = read_training_set()
-validation_set = read_validation_set()
-testing_set = read_testing_set()
+    print("Testing...")
+    hits=0
+    counter=0
+    testing_set=read_testing_set()
+    for t in testing_set:
+        for i in range(1,LINE_LEN):
+            for n in list_neurons_hidden_layer :
+                inpt=t[i]
+                n.sum(inpt, n.weights[i])
 
-for i in range(len(training_set[0])-1):
-    weights.append(generate_random_weights(number_neurons))
-for i in range(number_neurons):
-    weights.append(generate_random_weights(2))
-weights.append(generate_random_weights(1))
+        for nh in list_neurons_hidden_layer:
+            nh.sign() #to do signal function maybe we should change and solve the problems of the sigmoid
+            for no in list_neurons_output_layer:
+                no.sum(nh.output,calculate_weight())
+        
+        
+        output=calculate_softmax(list_neurons_output_layer)
+        
+        counter+=1
+        if output == t[COLUMN_RESULT]:
+            hits+=1
+        print("Expected result",t[COLUMN_RESULT]," Output: ", output," percentage: ",(hits/counter))
 
+        clean_layers(list_neurons_hidden_layer,list_neurons_output_layer)
+
+    print("Final result: ",(hits/counter),"% of hits")
 main()
