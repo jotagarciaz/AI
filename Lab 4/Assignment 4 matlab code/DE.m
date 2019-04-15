@@ -78,7 +78,7 @@
               
               % selection
               for z=1:populationSize
-                    if offspringFitness(z)<populationFitness(z) % comprobar que no faltan los ,: de los array
+                    if offspringFitness(z)<populationFitness(z) % comprobar que no faltan los ,: de los array revisar este posible fallo en PSO
                         population(z,:)=offspring(z,:);
                         populationFitness(z)=offspringFitness(z); % comprobar que no faltan los ,: de los array
                     end
