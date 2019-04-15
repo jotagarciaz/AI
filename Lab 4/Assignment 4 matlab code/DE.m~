@@ -8,11 +8,11 @@
  %example: functions = [2 4 9];
  %functions=[3 5 10];
  numF = size(functions,2);
- nTimes = 20; % Number of times in which a function is going to be solved
- dimension = 30; % Dimension of the problem
+ nTimes = 1; % Number of times in which a function is going to be solved
+ dimension = ; % Dimension of the problem
  populationSize = 100; % Adjust this to your algorithm
  pr=0.5; % probability of recombination
- F=0.4;
+ F=0.5;
  
  for i = 1:numF
 
@@ -73,7 +73,7 @@
                    end
                end
               
-               
+               %que los valores no sobrepasen el upper o lower
                offspringFitness = calculateFitnessPopulation_2005(fitfun, offspring, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
               
               % selection
@@ -86,8 +86,10 @@
               
               % recalculate
               
-
-              currentEval = currentEval + populationSize;
+%               populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
+%             
+%               bestSolutionFitness = min(populationFitness);
+                 currentEval = currentEval + populationSize;
               
               % Your algorithm goes here
               

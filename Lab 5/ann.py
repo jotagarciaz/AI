@@ -24,7 +24,7 @@ OUTPUT_LAYER=10
 #HIDDEN_LAYER=110
 #LEARNING_RATE=0.2
 
-NUMBER_OF_HIDDEN_LAYER=3
+NUMBER_OF_HIDDEN_LAYER=2
 NUMBER_OF_NODES_SMALLEST_LAYER=50
 HIDDEN_LAYER=NUMBER_OF_HIDDEN_LAYER*NUMBER_OF_NODES_SMALLEST_LAYER
 
@@ -120,7 +120,7 @@ def initialize_hidden_layer():
     list_neurons_hidden_layer=[]
     for j in range(0,NUMBER_OF_HIDDEN_LAYER):
         aux=[]
-        for i in range (0,HIDDEN_LAYER):
+        for i in range (0,(j+1)*NUMBER_OF_NODES_SMALLEST_LAYER):
             n = Neuron()    
             weight=calculate_weight() 
             n.add_weights(weight)
@@ -242,13 +242,13 @@ def main():
                             nh.sum(t[i], nh.weights[i])
                         nh.sigmoid() #to do signal function maybe we should change and solve the problems of the sigmoid
                     elif nhidx!=NUMBER_OF_HIDDEN_LAYER-1 :
-                        for i in range(HIDDEN_LAYER):
+                        for i in range((nhidx+1)*NUMBER_OF_NODES_SMALLEST_LAYER):
                             nh.sum(list_neurons_hidden_layer[nhidx-1][i].output,nh.weights[i])
                         nh.sigmoid()
 
             
             for no in list_neurons_output_layer:
-                for j in range(HIDDEN_LAYER):
+                for j in range(NUMBER_OF_NODES_SMALLEST_LAYER):
                     no.sum(list_neurons_hidden_layer[nhidx-1][j].output,no.weights[j])
                 no.sigmoid()
         
@@ -283,13 +283,13 @@ def main():
                             nh.sum(t[i], nh.weights[i])
                         nh.sigmoid() #to do signal function maybe we should change and solve the problems of the sigmoid
                     elif nhidx!=NUMBER_OF_HIDDEN_LAYER-1 :
-                        for i in range(HIDDEN_LAYER):
+                        for i in range((nhidx+1)*NUMBER_OF_NODES_SMALLEST_LAYER):
                             nh.sum(list_neurons_hidden_layer[nhidx-1][i].output,nh.weights[i])
                         nh.sigmoid()
 
             
             for no in list_neurons_output_layer:
-                for j in range(HIDDEN_LAYER):
+                for j in range(NUMBER_OF_NODES_SMALLEST_LAYER):
                     no.sum(list_neurons_hidden_layer[nhidx-1][j].output,no.weights[j])
                 no.sigmoid()
         
@@ -304,7 +304,8 @@ def main():
         
         if (hits/counter >=0.75):
             training_complete=True
-
+        else:
+            print("El resultado ha sido de ",(hits/counter)*100,"% de acierto")
     testing_set=read_testing_set()
     hits=0
     counter=0
@@ -317,13 +318,13 @@ def main():
                         nh.sum(t[i], nh.weights[i])
                     nh.sigmoid() #to do signal function maybe we should change and solve the problems of the sigmoid
                 elif nhidx!=NUMBER_OF_HIDDEN_LAYER-1 :
-                    for i in range(HIDDEN_LAYER):
+                    for i in range((nhidx+1)*NUMBER_OF_NODES_SMALLEST_LAYER):
                         nh.sum(list_neurons_hidden_layer[nhidx-1][i].output,nh.weights[i])
                     nh.sigmoid()
 
         
         for no in list_neurons_output_layer:
-            for j in range(HIDDEN_LAYER):
+            for j in range(NUMBER_OF_NODES_SMALLEST_LAYER):
                 no.sum(list_neurons_hidden_layer[nhidx-1][j].output,no.weights[j])
             no.sigmoid()
     

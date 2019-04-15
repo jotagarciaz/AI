@@ -1,17 +1,17 @@
  path = '/Users/jgarcia/Documents/Artificial Intelligence/Lab 4';
  addpath(genpath(path))
 
- %functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
- %example: 
- functions = 1;
+ %
+ functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
+ %example: functions = 1;
  %example: functions = [4 5 6 7 8 9 10];
  numF = size(functions,2);
- nTimes = 1; % Number of times in which a function is going to be solved
+ nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
- populationSize = 50; % Adjust this to your algorithm
+ populationSize = 200; % Adjust this to your algorithm
  delta = 0.15;
  pM = 0.1;
- alphaVariable = 0.25; %0.1; %ajustar un poco el alpha, aumentarlo
+ alphaVariable = 0.4; %0.1; %ajustar un poco el alpha, aumentarlo
 
  %el fitness no sirve para la selección
  for i = 1:numF
@@ -60,6 +60,8 @@
                for z=keepIndividuals:populationSize
                  probabilityOfSelection(z) = populationFitness(idx(z))/sum(populationFitness);
                end
+               
+
               % Crossover 
              
               for z=keepIndividuals:populationSize
@@ -71,9 +73,16 @@
                         pRoulette=rand;
                         element=0;
                         e=1;
-                        while element<pRoulette && e<=populationSize
-                            element=element+probabilityOfSelection(e);
-                            e=e+1;
+                        while element<pRoulette && e<=populationSizeindex
+                            aux=element+probabilityOfSelection(e);
+%                              element=aux;
+%                              e=e+1;
+                             if aux<pRoulette
+                                 element=aux;
+                                 e=e+1;
+                             else
+                                 break;
+                             end
                         end
                         e=e-1;
                 
@@ -85,14 +94,24 @@
 %                          e2=e2+1;
 %                      end
 %                      e2=e2-1;
-                        p=idx(randi([1,keepIndividuals],1,1));
-                        %Asegurar que sean distintos otra vez
-                     for r=1:dimension %asegurar que está entre upper y lower
+                       
+                         p=idx(randi([1,keepIndividuals],1,1));
+                         while p==e
+                             p=idx(randi([1,keepIndividuals],1,1));
+                         end
+                        
+                     for r=1:dimension 
                          IMax = max(population(p,r),population(e,r));
                          IMin = min(population(p,r),population(e,r));
                          I= IMax-IMin;
                          randomV = (IMin-I*alphaVariable)+((IMax+I*alphaVariable)-(IMin-I*alphaVariable)).*rand;
                          population(idx(z),r)=randomV;
+                         if randomV > upper
+                                population(idx(z),r) = upper;
+                         elseif randomV < lower
+                                population(idx(z),r) = lower;   
+                         end
+                         
                          
                      end
                     
@@ -129,15 +148,15 @@
               
               populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
               bestSolutionFitness = min(populationFitness);
-              currentEval = currentEval + populationSize; % a cambiar por los que cambio no por toda la pobal
+              currentEval = currentEval + populationSize-keepIndividuals; % a cambiar por los que cambio no por toda la población
               % Your algorithm goes here
               
-                if bestSolutionFitness<globalFitness
-                     globalFitness=bestSolutionFitness;
-                     fprintf('Global fitness: %d, generation: %d \n', globalFitness,g);
-                end 
-               g=g+1;
-                
+%                 if bestSolutionFitness<globalFitness
+%                      globalFitness=bestSolutionFitness;
+%                      fprintf('Global fitness: %d, generation: %d \n', globalFitness,g);
+%                 end 
+%                g=g+1;
+                 
          end
 
          % best individual
