@@ -78,7 +78,7 @@
               
               % selection
               for z=1:populationSize
-                    if offspringFitness(z)<populationFitness(z)
+                    if offspringFitness(z)<populationFitness(z) % comprobar que no faltan los ,: de los array
                         population(z,:)=offspring(z,:);
                         populationFitness(z)=offspringFitness(z); % comprobar que no faltan los ,: de los array
                     end
