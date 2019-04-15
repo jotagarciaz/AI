@@ -8,10 +8,10 @@
  numF = size(functions,2);
  nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
- populationSize = 120; % Adjust this to your algorithm
- delta = 0.15;
+ populationSize = 150; % Adjust this to your algorithm
+ delta = 0.17;
  pM = 0.13;
- alphaVariable = 0.45; %0.1; %ajustar un poco el alpha, aumentarlo
+ alphaVariable = 0.46; %0.1; %ajustar un poco el alpha, aumentarlo
 
  %el fitness no sirve para la selección
  for i = 1:numF
@@ -51,7 +51,7 @@
                selectOneForBest = find(populationFitness==bestSolutionFitness);
                bestParentIndex = selectOneForBest(1);
                [~,idx]=sort(populationFitness);
-               keepIndividuals=int8(populationSize/10);
+               keepIndividuals=int16(populationSize/10);
                selectOneForSecondBest=idx(2);
                secondBestParentIndex=selectOneForSecondBest(1);
              
