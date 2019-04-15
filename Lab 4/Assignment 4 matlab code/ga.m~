@@ -129,7 +129,7 @@
               
               populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
               bestSolutionFitness = min(populationFitness);
-              currentEval = currentEval + populationSize; % a cambiar por los que cambio no por toda la población
+              currentEval = currentEval + populationSize; % a cambiar por los que cambio no por toda la pobal
               % Your algorithm goes here
               
                 if bestSolutionFitness<globalFitness

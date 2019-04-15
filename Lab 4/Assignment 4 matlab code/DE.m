@@ -8,7 +8,7 @@
  %example: functions = [2 4 9];
  %functions=[3 5 10];
  numF = size(functions,2);
- nTimes = 20; % Number of times in which a function is going to be solved
+ nTimes = 1; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
  populationSize = 100; % Adjust this to your algorithm
  pr=0.5; % probability of recombination
@@ -59,32 +59,36 @@
               end
               
               % recombination
+              % generar un random para cada j
                for z=1:populationSize
-                    randomValue=rand;
-                    if(randomValue<pr)
-                        offspring(z,:)=mutants(z,:);
-                    else
-                        index=randi(dimension);
-                        offspring(z,index)=mutants(z,index);
-                    end      
-                    
+                   for j=1:dimension
+                        randomValue=rand;
+
+                        if(randomValue<pr)
+                            offspring(z,j)=mutants(z,j);
+                           
+                        end      
+                   end
                end
               
+               %que los valores no sobrepasen el upper o lower
                offspringFitness = calculateFitnessPopulation_2005(fitfun, offspring, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
               
               % selection
               for z=1:populationSize
                     if offspringFitness(z)<populationFitness(z)
                         population(z,:)=offspring(z,:);
+                        populationFitness(z)=offspringFitness(z);
                     end
                end
               
               % recalculate
               
-              populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
-            
-              bestSolutionFitness = min(populationFitness);
-              currentEval = currentEval + populationSize;
+%               populationFitness = calculateFitnessPopulation_2005(fitfun, population, o, A, M, a, alpha, b); %Fitness values of all individuals (smaller value is better)
+%             
+%               bestSolutionFitness = min(populationFitness);
+                 currentEval = currentEval + populationSize;
+              
               % Your algorithm goes here
               
 %               if bestSolutionFitness<globalFitness
