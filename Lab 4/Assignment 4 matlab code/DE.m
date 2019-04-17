@@ -2,17 +2,18 @@
  addpath(genpath(path))
 
  
+ %
  functions = [1 2 3 4 5 6 7 8 9 10]; %functions being solved
 
  %example: functions = 10;
- %example: functions = [2 4 9];
+ %example: functions = [4 5 6 7 8 9 10];
  %functions=[3 5 10];
  numF = size(functions,2);
  nTimes = 20; % Number of times in which a function is going to be solved
- dimension = 30; % Dimension of the problem
- populationSize = 100; % Adjust this to your algorithm
- pr=0.5; % probability of recombination
- F=0.4;
+ dimension = 30; % Dimension of the problemqq
+ populationSize = 70; % Adjust this to your algorithm
+ pr=0.8; % probability of recombination
+ F=0.5;
  
  for i = 1:numF
 
@@ -91,10 +92,10 @@
               
               % Your algorithm goes here
               
-%               if bestSolutionFitness<globalFitness
-%                   globalFitness=bestSolutionFitness;
-%                   fprintf('Global fitness: %d, generation: %d \n', globalFitness,g);
-%               end 
+              if bestSolutionFitness<globalFitness
+                  globalFitness=bestSolutionFitness;
+                  fprintf('Global fitness: %d, generation: %d \n', globalFitness,g);
+              end 
               g=g+1;
          end
 

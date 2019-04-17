@@ -139,25 +139,25 @@ def initialize_output_layer():
         weight = calculate_weight()
         n.add_weights(weight)
         n.sum(1,weight) #W0 
-        list_neurons_output_layer.append(n) 
+        np.append(list_neurons_output_layer,n)
     return list_neurons_output_layer
 
 def calculate_softmax(list_neurons_output_layer):
-    softmax=[]
+    softmax=np.array()
 
     for no in list_neurons_output_layer:
         no.sigmoid() #¿Es necesario?
-        softmax.append(math.exp(no.output))
-
+        np.append(softmax,math.exp(no.output))
+        
     suma=sum(softmax)
-    softmax=list(map(lambda x: x/suma,softmax))
-    output=softmax.index(max(softmax))
+    softmax=np.array((map(lambda x: x/suma,softmax)))
+    output = np.where(softmax == max(softmax))
     return output
 
 def err_output_layer(t,output_neurons):
-    error_at_output_layer=[]
+    error_at_output_layer=np.array()
     total_targets=[[(1 if i is  j else 0) for i in range(OUTPUT_LAYER)] for j in range(OUTPUT_LAYER)]
-    target=total_targets[t[COLUMN_RESULT]]
+    target=total_targets[ ]
 
     for idx,no in enumerate(output_neurons):
         error_at_output_layer.append((target[idx]-no.output)*no.output*(1-no.output))

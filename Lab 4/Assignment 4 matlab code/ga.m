@@ -9,9 +9,9 @@
  nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
  populationSize = 150; % Adjust this to your algorithm
- delta = 0.17;
- pM = 0.13;
- alphaVariable = 0.46; %0.1; %ajustar un poco el alpha, aumentarlo
+ delta = 0.12;
+ pM = 0.14;
+ alphaVariable = 0.45; %0.1; %ajustar un poco el alpha, aumentarlo
 
  %el fitness no sirve para la selección
  for i = 1:numF
