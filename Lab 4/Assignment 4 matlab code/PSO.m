@@ -8,12 +8,12 @@
  numF = size(functions,2);
  nTimes = 20; % Number of times in which a function is going to be solved
  dimension = 30; % Dimension of the problem
- populationSize = 100; % Adjust this to your algorithm
- Vmax=2;
- social = 2;
- cognitive = 0.05;
+ populationSize = 200; % Adjust this to your algorithm
+ Vmax=25;
+ social = 1;
+ cognitive = 0.0005;
  
- weight=075;
+ weight=-0.75;
  
  for i = 1:numF
 
@@ -56,16 +56,8 @@
           globalFitness=bestSolutionFitness; 
           
           
-          
-          for z=1:populationSize
-                     if xFitness(z)<pBest_fitness(z)
-                         pBest_fitness(z)=xFitness(z);
-                         if pBest_fitness(z)<bestSolutionFitness
-                               g=VX(z,:);
-                               
-                         end
-                     end
-          end
+          g=VX(1,:);
+         
              
          while(objetiveValue < bestSolutionFitness && currentEval < maxEval)
                        
@@ -116,14 +108,17 @@
       
               currentEval = currentEval + populationSize;
               
+              if bestSolutionFitness<globalFitness
+                  globalFitness=bestSolutionFitness;
+              end
               % Your algorithm goes here
               
                
-%                  if bestSolutionFitness<globalFitness
-%                       globalFitness=bestSolutionFitness;
-%                       fprintf('Global fitness: %d, generation: %d \n', globalFitness,generaciones);
-%                  end 
-%                  generaciones=generaciones+1;
+%                   if bestSolutionFitness<globalFitness
+%                        globalFitness=bestSolutionFitness;
+%                        fprintf('Global fitness: %d, generation: %d \n', globalFitness,generaciones);
+%                   end 
+                  generaciones=generaciones+1;
           end
 
          % best individual
